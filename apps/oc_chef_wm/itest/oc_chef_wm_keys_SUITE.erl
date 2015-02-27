@@ -1,7 +1,23 @@
-
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sw=4 et
-%% @author Stephen Delano <stephen@opscode.com>
-%% Copyright 2013 Opscode, Inc. All Rights Reserved.
+%% @author Tyler Cloke <tyler@chef.io>
+%% @author Marc Paradise <marc@chef.io>
+%% Copyright 2015 Chef Software, Inc. All Rights Reserved.
+%%
+%% This file is provided to you under the Apache License,
+%% Version 2.0 (the "License"); you may not use this file
+%% except in compliance with the License.  You may obtain
+%% a copy of the License at
+%%
+%%   http://www.apache.org/licenses/LICENSE-2.0
+%%
+%% Unless required by applicable law or agreed to in writing,
+%% software distributed under the License is distributed on an
+%% "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+%% KIND, either express or implied.  See the License for the
+%% specific language governing permissions and limitations
+%% under the License.
+%%
 
 -module(oc_chef_wm_keys_SUITE).
 
@@ -41,8 +57,8 @@
 init_per_suite(LastConfig) ->
     Config = chef_test_db_helper:start_db(LastConfig, "oc_chef_wm_itests"),
     Config2 = setup_helper:start_server(Config),
-    make_org(?ORG_NAME,?ORG_AUTHZ_ID),
-    make_org(?ORG_NAME2,?ORG2_AUTHZ_ID),
+    make_org(?ORG_NAME, ?ORG_AUTHZ_ID),
+    make_org(?ORG_NAME2 ,?ORG2_AUTHZ_ID),
     OrgId = chef_db:fetch_org_id(context(), ?ORG_NAME),
     OrgId2 = chef_db:fetch_org_id(context(), ?ORG_NAME2),
     {ok, PubKey} = file:read_file("../../spki_public.pem"),
@@ -58,16 +74,16 @@ all() ->
      list_user_multiple_keys,
      list_client_no_keys,
      list_user_no_keys,
-     get_client_default_key,
-     get_user_default_key,
-     get_client_multiple_keys,
-     get_user_multiple_keys,
-     get_client_no_keys,
-     get_user_no_keys,
-     get_client_wrong_key,
-     get_user_wrong_key,
-     get_client_key_from_wrong_org_client,
-     get_user_key_from_wrong_org_user,
+     %%get_client_default_key,
+     %%get_user_default_key,
+     %%get_client_multiple_keys,
+     %%get_user_multiple_keys,
+     %%get_client_no_keys,
+     %%get_user_no_keys,
+     %%get_client_wrong_key,
+     %%get_user_wrong_key,
+     %%get_client_key_from_wrong_org_client,
+     %%get_user_key_from_wrong_org_user,
      post_user_new_valid_key,
      post_client_new_valid_key,
      post_key_with_invalid_date,
@@ -126,7 +142,7 @@ list_user_no_keys(_) ->
 %% GET /organizations/org/clients/client/keys/key && GET /users/client/keys/key
 get_client_default_key(Config) ->
     Result = http_named_key_request(get, client, ?CLIENT_NAME, "default"),
-    ?assertMatch({ok, "200", _, _} , Result),
+    ?assertMatch({ok, "200", _, _}, Result),
     BodyEJ = chef_json:decode(response_body(Result)),
     ExpectedEJ = new_key_ejson(Config, <<"default">>, <<"infinity">>),
     ?assertMatch(ExpectedEJ, BodyEJ),
@@ -134,7 +150,7 @@ get_client_default_key(Config) ->
 
 get_user_default_key(Config) ->
     Result = http_named_key_request(get, user, ?USER_NAME, "default"),
-    ?assertMatch({ok, "200", _, _} , Result),
+    ?assertMatch({ok, "200", _, _}, Result),
     BodyEJ = chef_json:decode(response_body(Result)),
     ExpectedEJ = new_key_ejson(Config, <<"default">>, <<"infinity">>),
     ?assertMatch(ExpectedEJ, BodyEJ),
@@ -143,7 +159,7 @@ get_user_default_key(Config) ->
 get_client_multiple_keys(Config) ->
     %% KEY1
     Result = http_named_key_request(get, client, ?CLIENT_NAME, ?KEY1NAME),
-    ?assertMatch({ok, "200", _, _} , Result),
+    ?assertMatch({ok, "200", _, _}, Result),
     BodyEJ = chef_json:decode(response_body(Result)),
     ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRE),
     ?assertMatch(ExpectedEJ, BodyEJ),
@@ -159,45 +175,45 @@ get_client_multiple_keys(Config) ->
 get_user_multiple_keys(Config) ->
     %% KEY1
     Result = http_named_key_request(get, user, ?USER_NAME, ?KEY1NAME),
-    ?assertMatch({ok, "200", _, _} , Result),
+    ?assertMatch({ok, "200", _, _}, Result),
     BodyEJ = chef_json:decode(response_body(Result)),
     ExpectedEJ = new_key_ejson(Config, ?KEY1NAME, ?KEY1EXPIRE),
     ?assertMatch(ExpectedEJ, BodyEJ),
 
     %% KEY2
     Result = http_named_key_request(get, user, ?USER_NAME, ?KEY2NAME),
-    ?assertMatch({ok, "200", _, _} , Result),
+    ?assertMatch({ok, "200", _, _}, Result),
     BodyEJ = chef_json:decode(response_body(Result)),
     ExpectedEJ = new_key_ejson(Config, ?KEY2NAME, ?KEY2EXPIRE),
     ?assertMatch(ExpectedEJ, BodyEJ),
     ok.
 
-get_client_no_keys(Config) ->
+get_client_no_keys(_) ->
     Result = http_named_key_request(get, client, ?ADMIN_USER_NAME, "default"),
     ?assertMatch({ok, "404", _, _} , Result),
     ok.
 
-get_user_no_keys(Config) ->
+get_user_no_keys(_) ->
     Result = http_named_key_request(get, user, ?ADMIN_USER_NAME, "default"),
     ?assertMatch({ok, "404", _, _} , Result),
     ok.
 
-get_client_wrong_key(Config) ->
+get_client_wrong_key(_) ->
     Result = http_named_key_request(get, client, ?ADMIN_USER_NAME, "wrong_key"),
     ?assertMatch({ok, "404", _, _} , Result),
     ok.
 
-get_user_wrong_key(Config) ->
+get_user_wrong_key(_) ->
     Result = http_named_key_request(get, user, ?ADMIN_USER_NAME, "wrong_key"),
     ?assertMatch({ok, "404", _, _} , Result),
     ok.
 
-get_client_key_from_wrong_org_client(Config) ->
+get_client_key_from_wrong_org_client(_) ->
     Result = http_named_key_request(get, client, ?CLIENT_NAME2, "default"),
     ?assertMatch({ok, "403", _, _} , Result),
     ok.
 
-get_user_key_from_wrong_org_user(Config) ->
+get_user_key_from_wrong_org_user(_) ->
     Result = http_named_key_request(get, user, ?USER_NAME2, "default"),
     ?assertMatch({ok, "403", _, _} , Result),
     ok.
@@ -399,6 +415,7 @@ http_named_key_request(Method, Type, Requestor, Name) ->
 
 http_keys_request(Method, user, Requestor, Name, Body) ->
     Url = "http://localhost:8000/users/user1/keys/" ++ Name,
+    ct:pal("url ~n~p~n", [Url]),
     ibrowse:send_req(Url, [{"x-ops-userid", binary_to_list(Requestor)},
                            {"accept", "application/json"},
                            {"content-type", "application/json"}], Method, Body);
@@ -410,7 +427,7 @@ http_keys_request(Method, client, Requestor, Name, Body) ->
 
 % Some helpers to keep noise out of the tests...
 make_org(OrgName, OrgAuthzId) ->
-    Org = chef_object:new_record(oc_chef_organization, nil, OrgAutzId,
+    Org = chef_object:new_record(oc_chef_organization, nil, OrgAuthzId,
                                  {[{<<"name">>, OrgName}, {<<"full_name">>, OrgName}]}),
     chef_db:create(Org, context(), OrgAuthzId).
 

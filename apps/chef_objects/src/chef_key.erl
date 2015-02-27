@@ -32,6 +32,7 @@
          fields_for_update/1,
          fields_for_fetch/1,
          ejson_from_list/2,
+         ejson_from_find/1,
          record_fields/0,
          list/2,
          set_updated/2,
@@ -100,6 +101,11 @@ ejson_from_list(KeysList, URIDecorator) ->
         {<<"name">>, Name},
         {<<"expired">>, Expired}]} || [Name, Expired] <- KeysList ].
 
+ejson_from_find(#chef_key{key_name = Name, public_key = PublicKey, expires_at = ExpirationDate}) ->
+    {[{<<"name">>, Name},
+      {<<"public_key">>, PublicKey},
+      {<<"expiration_date">>, ExpirationDate}]}.
+
 list(#chef_key{id = Id}, CallbackFun) when is_binary(Id) ->
     CallbackFun({list_query(), [Id], rows}).
 
@@ -124,7 +130,6 @@ parse_expiration(Expiration) when Expiration =:= undefined;
    ?INFINITY_TIMESTAMP;
 parse_expiration(Expiration) when is_binary(Expiration) ->
     ec_date:parse(binary_to_list(Expiration)).
-
 
 name(#chef_key{key_name = KeyName}) ->
     KeyName.

@@ -1,4 +1,4 @@
-%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80. -*-
+%% -*- erlang-indent-level: 4;indent-tabs-mode: nil; fill-column: 80 -*-
 %% ex: ts=4 sw=4 et
 %% @author Marc Paradise <marc@chef.io>
 %% Copyright 2015 Chef Software, Inc. All Rights Reserved.
@@ -86,7 +86,7 @@ make_resource_state_for_object(Type, Object) ->
 
 
 %% Permissions:
-%% The permissios model here and in named_key will be the same
+%% The permissions model here and in named_key will be the same
 %% Keys are considered an attribute of the object that owns them:
 %%   * target object (user or client) must exist
 %%   * In order to view a target's keys, requestor will need read access to that target. (handled in default is_authorized)
